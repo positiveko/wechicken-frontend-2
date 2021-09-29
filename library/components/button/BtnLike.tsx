@@ -9,6 +9,7 @@ import { faHeart as blankHeart } from '@fortawesome/free-regular-svg-icons';
 import { faHeart as filledHeart } from '@fortawesome/free-solid-svg-icons';
 import { faBookmark as blankBookmarks } from '@fortawesome/free-regular-svg-icons';
 import { faBookmark as filledBookmarks } from '@fortawesome/free-solid-svg-icons';
+import { useToast } from 'library/hooks';
 
 type Props = {
   id: number;
@@ -21,20 +22,17 @@ type Props = {
 function BtnLike({ id, status, type, setActiveAlert, handleRemoveCard }: Props): JSX.Element {
   const user = useSelector(currentUser);
   const [isLiked, setLiked] = useState(status ?? false);
-  const likeStatus = useMutation(([type, id, token]: [string, number, string]) =>
-    postLikeStatus(type, id, token),
-  );
+  const likeStatus = useMutation(([type, id]: [string, number]) => postLikeStatus(type, id));
+  const { showToast } = useToast();
 
-  // TODO 쿠키에 토큰 저장 전까지 임시로 토큰 전달
   const fetchLikeStatus = async (): Promise<void> => {
-    const { data, status } = await likeStatus.mutateAsync([type, id, user.token]);
+    const { data, status } = await likeStatus.mutateAsync([type, id]);
 
     if (status === 200) {
       const type = data.message === 'LIKED' ? '좋아요' : '북마크';
       const action = isLiked === true ? '에서 삭제' : '에 추가';
 
-      // TODO 토스트 알람 있으면 좋을 것 같아요
-      console.log(`${type} 목록${action}되었습니다.`);
+      showToast({ message: `${type} 목록${action}되었습니다.` });
     }
   };
 

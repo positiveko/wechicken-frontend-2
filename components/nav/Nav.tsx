@@ -13,6 +13,8 @@ import { LoginUser } from 'library/models';
 import { currentUser } from 'library/store/saveUser';
 import { setAlert } from 'library/store/setAlert';
 import { setLoginModalOn } from 'library/store/setLoginModal';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faCog } from '@fortawesome/free-solid-svg-icons';
 
 type Props = {
   isBlurred: boolean;
@@ -33,6 +35,8 @@ function Nav({ isBlurred, setBlurred }: Props): JSX.Element {
     (selected: string): void => {
       setDropDownOpen(false);
       if (selected === '로그아웃') {
+        sessionStorage.clear();
+
         dispatch(
           setAlert({
             setSelectedMenu,
@@ -61,6 +65,8 @@ function Nav({ isBlurred, setBlurred }: Props): JSX.Element {
     setDropDownOpen(false);
   };
 
+  const isMyGroupPage = router.pathname === '/mygroup';
+
   return (
     <>
       <NavBox
@@ -71,16 +77,30 @@ function Nav({ isBlurred, setBlurred }: Props): JSX.Element {
         {isCreateMyGroupModalOn && (
           <CreateMyGroup setCreateMyGroupModalOn={setCreateMyGroupModalOn} />
         )}
-        {isModifyMyGroup && (
-          <ModifyMyGroup getMyGroupTitle={''} setModifyMyGroup={setModifyMyGroup} />
-        )}
-        <LogoWrap>
+        {isModifyMyGroup && <ModifyMyGroup setModifyMyGroup={setModifyMyGroup} />}
+        <LogoWrap isSearchActive={isSearchActive} isMyGroupPage={isMyGroupPage}>
           <Link href="/" passHref>
-            <Logo onClick={() => setSelectedMenu('')}>
+            <Logo
+              onClick={() => setSelectedMenu('')}
+              isSearchActive={isSearchActive}
+              isMyGroupPage={isMyGroupPage}
+            >
               <img className="logoImage" alt="logo" src="/images/logo.png" />
               <div className="logoText">&gt;wechicken</div>
             </Logo>
           </Link>
+          {isMyGroupPage && (
+            <>
+              <NthTitle>{user.myGroupStatus ? (user as LoginUser).myGroupTitle : ''}</NthTitle>
+              {(user as LoginUser)?.master && (
+                <FontAwesomeIcon
+                  onClick={() => setModifyMyGroup(true)}
+                  className="settingMyGroup"
+                  icon={faCog}
+                />
+              )}
+            </>
+          )}
         </LogoWrap>
         <UserWrap>
           {router.pathname !== '/search' && (
@@ -142,11 +162,15 @@ const NavBox = styled.div<{ isBlurred: boolean }>`
   }
 `;
 
-const LogoWrap = styled.div`
+const LogoWrap = styled.div<{ isSearchActive: boolean; isMyGroupPage: boolean }>`
   width: 422px;
   height: 52px;
   display: flex;
   align-items: center;
+
+  ${({ isSearchActive, theme }) => theme.sm`
+    ${isSearchActive ? 'width: 122px' : 'width: 422px'}
+  `}
 
   .settingMyGroup {
     margin-left: 15px;
@@ -154,17 +178,31 @@ const LogoWrap = styled.div`
     cursor: pointer;
     opacity: 0.7;
   }
+
   .settingMyGroup:hover {
     opacity: 1;
   }
+
+  @media only screen and (max-width: 380px) {
+    .logoText {
+      ${({ isSearchActive, theme, isMyGroupPage }) => theme.sm`
+        ${isSearchActive || isMyGroupPage ? 'display: none' : 'display: block'}
+      `}
+    }
+  }
 `;
 
-const Logo = styled.a`
+const Logo = styled.a<{ isSearchActive: boolean; isMyGroupPage: boolean }>`
   display: flex;
   align-items: center;
   width: 11.875rem;
+
   text-decoration: none;
   color: ${({ theme }) => theme.fontColor};
+
+  ${({ isSearchActive, theme, isMyGroupPage }) => theme.sm`
+    ${isSearchActive || isMyGroupPage ? 'width: auto' : 'width: 11.875rem'}
+  `}
 
   .logoImage {
     width: 3.1875rem;
@@ -186,19 +224,31 @@ const Logo = styled.a`
   }
 `;
 
+const NthTitle = styled.div`
+  font-family: ${({ theme }) => theme.fontTitle};
+  font-style: normal;
+  font-weight: bold;
+  font-size: 18px;
+  line-height: 21px;
+  color: ${({ theme }) => theme.orange};
+`;
+
 const UserWrap = styled.div`
   position: relative;
   display: flex;
   justify-content: center;
   align-items: center;
   height: 47px;
-  
 
   .masterCrown {
     width: 25px;
     height: 25px;
     position: absolute;
-    top: -20px;
+    top: -1.25rem;
     right: 12px;
+
+    ${({ theme }) => theme.sm`
+      top: -10px;
+    `}
   }
 `;

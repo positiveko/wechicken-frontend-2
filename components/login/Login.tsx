@@ -1,11 +1,11 @@
 import { useState } from 'react';
+import { useDispatch } from 'react-redux';
 import styled from '@emotion/styled';
 import GoogleLogin from 'components/login/GoogleLogin';
 import LoginForm from 'components/login/LoginForm';
 import CelebratingModal from 'components/login/CelebratingModal';
 import { ModalLayout } from 'library/components/modal';
 import Logo from 'library/components/modal/Logo';
-import { useDispatch } from 'react-redux';
 import { setLoginModalOn } from 'library/store/setLoginModal';
 
 function Login(): JSX.Element {
@@ -22,6 +22,7 @@ function Login(): JSX.Element {
     <ModalLayout
       width="675px"
       height="29.375rem"
+      style={{ minHeight: '29rem', minWidth: '260px' }}
       closeModal={() => dispatch(setLoginModalOn(false))}
     >
       {isLoginSuccess ? (
@@ -67,6 +68,10 @@ const LoginBoxRight = styled.div`
   justify-content: center;
   align-items: flex-start;
   flex-direction: column;
+
+  ${({ theme }) => theme.sm`
+    margin-left: 10px;
+  `}
 `;
 
 const Greeting = styled.div`

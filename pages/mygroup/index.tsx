@@ -17,11 +17,11 @@ import { HeaderBox } from 'styles/theme';
 import BtnTheme from 'library/components/button/ButtonTheme';
 import PostsOfTheWeek from 'components/myGroup/postsOfTheWeek/PostsOfTheWeek';
 import { createPost, getMyGroup, joinGroup } from 'library/api/mygroup';
-import AddPost from 'components/addPost/AddPost';
+import PostEditor from 'library/components/postEditor/PostEditor';
 import { ModalLayout } from 'library/components/modal';
 import { Obj } from 'library/models';
-import { useSelector } from 'react-redux';
-import { currentUser } from 'library/store/saveUser';
+import { useDispatch, useSelector } from 'react-redux';
+import { currentUser, saveUser } from 'library/store/saveUser';
 
 const initialBydays = {
   MON: [],
@@ -34,13 +34,14 @@ const initialBydays = {
 };
 
 export default function MyGroupPage(): JSX.Element {
+  const dispatch = useDispatch();
   const user = useSelector(currentUser);
   const [isAddModalActive, setAddModalActive] = useState<boolean>(false);
   const [byDays, setByDays] = useState<Bydays>(initialBydays);
   const [userPostsCounting, setUserPostsCounting] = useState<UserPostsCounting>({});
   const { data, isLoading, refetch } = useQuery<MyGroup>(
     ['MyGroup', user.token],
-    () => getMyGroup(user.token),
+    () => getMyGroup(),
     {
       onSuccess: ({ by_days, userPostsCounting }) => {
         setByDays(by_days);
@@ -48,12 +49,17 @@ export default function MyGroupPage(): JSX.Element {
       },
     },
   );
-  const { mutate: mutateCreatePost } = useMutation((body: Obj) => createPost(body, user.token), {
+  const { mutate: mutateCreatePost } = useMutation((body: Obj) => createPost(body), {
     onSuccess: () => refetch(),
   });
-  const { mutate: mutateJoinGroup } = useMutation(() => joinGroup(user.token), {
+  const { mutate: mutateJoinGroup } = useMutation(() => joinGroup(), {
     onSuccess: () => refetch(),
   });
+
+  useEffect(() => {
+    if (isLoading || isNil(data)) return;
+    dispatch(saveUser({ ...user, myGroupTitle: data.myGroup.title }));
+  }, [isLoading]);
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -78,18 +84,18 @@ export default function MyGroupPage(): JSX.Element {
   };
 
   if (isLoading || isNil(data)) {
-    return <Loading></Loading>;
+    return <Loading />;
   }
 
   return (
     <MyPageContainer>
       {isAddModalActive && (
         <ModalLayout closeModal={closeAddPost} closeOnClickDimmer={true}>
-          <AddPost name={data.myProfile.name} handleSubmit={handleAddPost} />
+          <PostEditor name={data.myProfile.name} handleSubmit={handleAddPost} />
         </ModalLayout>
       )}
       <NthTitle>{data.myGroup.title ?? ''}</NthTitle>
-      <MyGroupBanner ranking={data.Ranks}></MyGroupBanner>
+      <MyGroupBanner ranking={data.Ranks} />
       <ContentWrap>
         {data.is_group_joined && (
           <Contribution>
@@ -108,14 +114,14 @@ export default function MyGroupPage(): JSX.Element {
           <HeaderBox width={149}>
             <div className="title">이주의 포스팅</div>
             <div className="btnUpdate">
-              <CustomCalendar handleClickDate={handleClickDate} data={data}></CustomCalendar>
+              <CustomCalendar handleClickDate={handleClickDate} data={data} />
               {data.is_group_joined && (
                 <BtnTheme
                   value="포스트 +"
                   handleFunction={() => {
                     setAddModalActive(true);
                   }}
-                ></BtnTheme>
+                />
               )}
             </div>
           </HeaderBox>
@@ -123,7 +129,7 @@ export default function MyGroupPage(): JSX.Element {
             dayPosts={byDays}
             isGroupJoined={data.is_group_joined}
             executeFunction={handleGroupJoined}
-          ></PostsOfTheWeek>
+          />
         </ThisWeek>
       </ContentWrap>
     </MyPageContainer>
@@ -134,6 +140,9 @@ const MyPageContainer = styled.div`
   padding-top: 5rem;
   margin-bottom: 70px;
   background-color: ${({ theme }) => theme.background};
+  ${({ theme }) => theme.sm`
+    width: 100%;
+  `}
 `;
 
 const NthTitle = styled.p`

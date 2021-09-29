@@ -57,7 +57,7 @@ function SubMenu({
           {page.bookmark}
         </li>
       </Link>
-      <Link href="/MyPage" passHref>
+      <Link href="/myprofile" passHref>
         <li onClick={handleSelected} className={handleFocus(page.myPage)}>
           {page.myPage}
         </li>
@@ -98,11 +98,11 @@ const SubMenuBox = styled.ul`
     }
 
     ${({ theme }) => theme.md`
-      font-size: 16px;
+      font-size: 14px;
     `}
 
     ${({ theme }) => theme.sm`
-      font-size: 14px;
+      font-size: 12px;
     `}
   }
 

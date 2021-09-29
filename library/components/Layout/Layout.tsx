@@ -7,6 +7,7 @@ import { useIntersectionObserver } from 'library/hooks';
 import { useSelector } from 'react-redux';
 import { alertForm } from 'library/store/setAlert';
 import { loginModal } from 'library/store/setLoginModal';
+import Toast from 'components/toast/Toast';
 
 type Props = {
   children: React.ReactNode;
@@ -47,6 +48,9 @@ export default function Layout({ children }: Props): JSX.Element {
       <Nav isBlurred={isBlurred} setBlurred={setBlurred} />
       <main>{children}</main>
       <Observer ref={ref} />
+      <ToastWrapper>
+        <Toast />
+      </ToastWrapper>
     </LayoutBox>
   );
 }
@@ -61,4 +65,9 @@ const Observer = styled.div`
   top: calc(100vh + 13.3125rem);
   height: 10px;
   width: 3px;
+`;
+
+const ToastWrapper = styled.div`
+  display: flex;
+  justify-content: center;
 `;

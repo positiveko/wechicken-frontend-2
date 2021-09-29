@@ -12,12 +12,36 @@ export const user = createSlice({
     message: '',
   },
   reducers: {
-    saveUser(state, action: PayloadAction<LoginUser | CreatedUser>) {
-      return { ...state, ...action.payload };
+    saveUser(state, { payload }: PayloadAction<LoginUser | CreatedUser>) {
+      const { token, profile, myGroupStatus, nth } = payload;
+      sessionStorage.setItem(
+        'USER',
+        JSON.stringify({
+          token,
+          profile,
+          myGroupStatus,
+          nth,
+          master: (payload as LoginUser).master ?? false,
+        }),
+      );
+
+      return { ...state, ...payload };
+    },
+    setUserProfileImg: (state, { payload }: PayloadAction<string>) => {
+      const userFromSessionStorage = sessionStorage.getItem('USER');
+
+      if (userFromSessionStorage) {
+        sessionStorage.setItem(
+          'USER',
+          JSON.stringify({ ...JSON.parse(userFromSessionStorage), profile: payload }),
+        );
+      }
+
+      return { ...state, profile: payload };
     },
   },
 });
 
-export const { saveUser } = user.actions;
+export const { saveUser, setUserProfileImg } = user.actions;
 export const currentUser = (state: AppState): LoginUser | CreatedUser => state.user;
 export default user.reducer;

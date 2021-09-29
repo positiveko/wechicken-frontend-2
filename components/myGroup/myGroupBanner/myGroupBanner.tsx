@@ -15,7 +15,7 @@ const medal: Obj = {
   3: '🥉',
 };
 
-export default function MyGroupBanner({ ranking }: MyGroupBanner) {
+export default function MyGroupBanner({ ranking }: MyGroupBanner): JSX.Element {
   return (
     <BannerContents>
       <img src="/images/mygroup_banner.png" alt="banner"></img>
@@ -47,15 +47,30 @@ const BannerContents = styled.div`
   }
 
   ${({ theme }) => theme.sm`
-  flex-direction: column;
+    width: 100%;
+    flex-direction: column;
 
-  img {
-    width: 330px;
-  }
+    .contents {
+      width: 100%;
+    }
+
+    img {
+      width: 95%;
+    }
   `}
 
   ${({ theme }) => theme.md`
-  flex-direction: column;
+    img {
+      width: 95%;
+    }
+  `}
+
+  ${({ theme }) => theme.lg`
+    flex-direction: column;
+
+    img{
+      margin-bottom: 3rem;
+    }
   `}
 
   .contents {
@@ -68,13 +83,17 @@ const BannerContents = styled.div`
     `}
 
     .title {
-      width: 350px;
+      width: 100%;
       margin-bottom: 20px;
-      font-size: 50px;
+      font-size: 3rem;
       font-weight: 500;
       letter-spacing: 7px;
       color: ${({ theme }) => theme.vermilion};
       word-break: keep-all;
+
+      ${({ theme }) => theme.lg`
+        font-size: 2rem;
+      `}
 
       ${({ theme }) => theme.md`
       margin-top: 40px;
